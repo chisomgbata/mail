@@ -1,62 +1,37 @@
-version: '3.7'
+version: "3"
+
 services:
-  mail:
-    image: docker.io/mailserver/docker-mailserver:latest
-    container_name: mail
-    hostname: example.com
-    domainname: example.com
-    environment:
-      - ENABLE_SPAMASSASSIN=1
-      - ENABLE_CLAMAV=1
-      - ENABLE_FAIL2BAN=1
-      - ONE_DIR=1
-      - DMS_DEBUG=0
-      - DMS_DEBUG_SQL=0
-      - PERMIT_DOCKER=1
-      - APPEND_DOMAINS=example.com
-      - APPEND_MYNETWORKS=172.0.0.0/8
-      - SSL_TYPE=letsencrypt
-      - SSL_CERT_PATH=/etc/letsencrypt/live/example.com/fullchain.pem
-      - SSL_KEY_PATH=/etc/letsencrypt/live/example.com/privkey.pem
-      - SSL_CERT_PATH_SELFSIGNED=/etc/ssl/certs/mailcert.pem
-      - SSL_KEY_PATH_SELFSIGNED=/etc/ssl/private/mailkey.pem
-      - SSL_DHPARAM_PATH=/etc/ssl/certs/dhparam.pem
-      - DBHOST=db
-      - DBUSER=mailserver
-      - DBNAME=mailserver
-      - DBPASS=your_password
-      - DBROOT_PASS=your_root_password
-    volumes:
-      - maildata:/var/mail
-      - mailstate:/var/mail-state
-      - maillogs:/var/log/mail
-      - mailconfigs:/tmp/docker-mailserver
-      - /etc/letsencrypt:/etc/letsencrypt
-      - /etc/ssl/certs:/etc/ssl/certs
-      - /etc/ssl/private:/etc/ssl/private
-    ports:
-      - "25:25"
-      - "143:143"
-      - "587:587"
-      - "993:993"
-      - "4190:4190"
-    restart: unless-stopped
-  webmail:
-    image: docker.io/rainloop/rainloop:latest
-    container_name: webmail
-    hostname: webmail.example.com
-    environment:
-      - RAINLOOP_DOMAIN=example.com
-      - RAINLOOP_ADMIN_LOGIN=admin@example.com
-      - RAINLOOP_ADMIN_PASSWORD=your_admin_password
-    volumes:
-      - rainloopdata:/var/lib/rainloop
-    ports:
-      - "8080:80"
+  kutt:
+    image: kutt/kutt
     depends_on:
-      - mail
-    restart: unless-stopped
-  db:
-    image: mysql:8.0
-    container_name: mail-db
+      - postgres
+      - redis
+    command: ["./wait-for-it.sh", "postgres:5432", "--", "npm", "start"]
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
     environment:
+      DB_HOST: postgres
+      DB_NAME: kutt
+      DB_USER: user
+      DB_PASSWORD: pass
+      REDIS_HOST: redis
+
+  redis:
+    image: redis:6.0-alpine
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: kutt
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  redis_data:
+  postgres_data:
