@@ -9,21 +9,6 @@ services:
     command: ["./wait-for-it.sh", "postgres:5432", "--", "npm", "start"]
     ports:
       - "3001:3000"
-    env_file:
-      - .env
-    environment:
-      DB_HOST: postgres
-      DB_NAME: kutt
-      DB_USER: user
-      DB_PASSWORD: pass
-      REDIS_HOST: redis
-      SITE_NAME: sukkart
-      JWT_SECRET: tIlFIcZKt3TBHfKYCScb41qYSPvRvI9mL6xl3yTIrXhqrEfkBj
-      MAIL_HOST: smtp.zoho.com
-      MAIL_PORT: 365
-      MAIL_USER: admin@sukkart.com
-      MAIL_PASSWORD: TEST
-      DEFAULT_DOMAIN: link.sukkart.com
 
   redis:
     image: redis:6.0-alpine
