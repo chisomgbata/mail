@@ -23,6 +23,7 @@ services:
       MAIL_PORT: 365
       MAIL_USER: admin@sukkart.com
       MAIL_PASSWORD: TEST
+      DEFAULT_DOMAIN: https://link.sukkart.com
 
   redis:
     image: redis:6.0-alpine
